@@ -1,0 +1,14 @@
+{
+	"fields": {
+		"project": {
+			"key": "PROPRO"
+		},
+		"summary": "Archer QG",
+		"issuetype": {
+			"name": "Task"
+		},
+		"Epic Link": "PROPRO-2525",
+		"description": "error in archer QG"
+	}
+}
+
