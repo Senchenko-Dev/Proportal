@@ -1,11 +1,81 @@
----  
-#отрезания zip
-- name: Get artifact name without extension
-  set_fact:
-    artifact_base_name: "{{ artifact_name | regex_replace('.tar.gz', '') }}"
+---
+- name: Find all builds in folder
+  shell: "ls -t {{ builds_folder }}"
+  register: all_builds
 
-#проверка на существующий на сервере билд
-- name: Check path to exists build folder
-  stat:
-    path: "{{ builds_folder }}{{ artifact_base_name }}"
-  register: folder_check
+- name: Getting the latest build
+  set_fact:
+    latest_build: "{{ all_builds.stdout_lines[0] }}"
+
+- name: Remove all builds except the last three
+  become: yes
+  file:
+    path: "{{ builds_folder }}{{ item }}"
+    state: absent
+    force: yes
+  loop: "{{ all_builds.stdout_lines[7:] }}"
+
+- block:
+    - name: Replace variables in .env file false to true
+      replace:
+        path: "{{ builds_folder }}{{ artifact_base_name }}/.env"
+        regexp: "{{ item.regexp }}"
+        replace: "{{ item.replace }}"
+      with_items:
+        - { regexp: 'APP_DEBUG=False', replace: 'APP_DEBUG=True' }
+        - { regexp: 'SHOW_ERROR=False', replace: 'SHOW_ERROR=True' }
+
+    - name: Warmup Cache
+      shell: php74 bin/console cache:warmup
+      args:
+        chdir: "{{ builds_folder }}{{ artifact_base_name }}/"
+
+    - name: phpunit tests
+      shell: php74 bin/phpunit tests/phpUnitTests/SwaggerTest.php
+      args:
+        chdir: "{{ builds_folder }}{{ artifact_base_name }}/"
+
+    - name: Replace variables in .env file true to false
+      replace:
+        path: "{{ builds_folder }}{{ artifact_base_name }}/.env"
+        regexp: "{{ item.regexp }}"
+        replace: "{{ item.replace }}"
+      with_items:
+        - { regexp: 'APP_DEBUG=True', replace: 'APP_DEBUG=False' }
+        - { regexp: 'SHOW_ERROR=True', replace: 'SHOW_ERROR=False' }
+
+    - name: Remove folders insaide var
+      become: yes
+      shell: rm -rf "{{ builds_folder }}{{ artifact_base_name }}/var/cache/test"
+      ignore_errors: yes
+
+    - name: rm var
+      become: yes
+      file:
+        path: "{{ builds_folder }}{{ artifact_base_name }}/var"
+        state: absent
+        force: yes
+      ignore_errors: yes
+
+    - name: Warmup Cache
+      shell: php74 bin/console cache:warmup
+      args:
+        chdir: "{{ builds_folder }}{{ artifact_base_name }}/"
+
+    - name: chmod -R 777 {{builds_folder}}{{ artifact_base_name }}/var
+      file:
+        path: "{{builds_folder}}{{ artifact_base_name }}/var"
+        recurse: yes
+        mode: "0777"
+      become: yes
+
+    - name: correct console
+      shell: php74 bin/console
+      args:
+        chdir: "{{ builds_folder }}{{ artifact_base_name }}/"
+
+    - name: check configs
+      shell: php74 bin/console check:config
+      args:
+        chdir: "{{ builds_folder }}{{ artifact_base_name }}/"
+  when: (server_APP_ENV == "test63")
