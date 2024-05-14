@@ -1,0 +1,95 @@
+---
+- name: Check Builds folder
+  stat:
+    path: "{{ builds_folder }}"
+  register: builds
+
+- name: Create if folder Builds doesn't not exists
+  file:
+    path: "{{ builds_folder }}"
+    state: directory
+  when: not builds.stat.exists
+
+- name: Check Prod folder
+  stat:
+    path: "{{ prod_symlink }}"
+  register: prod
+
+- name: Create if folder Prod doesn't not exists
+  file:
+    path: "{{ prod_symlink }}"
+    state: directory
+  when: not prod.stat.exists
+
+- name: Check Conf folder
+  stat:
+    path: "{{ conf_folder }}"
+  register: conf
+
+- name: Create if folder Conf doesn't not exists
+  file:
+    path: "{{ conf_folder }}"
+    state: directory
+  when: not conf.stat.exists
+
+- name: Create folder conf/logs
+  file:
+    path: "{{ logs_folder }}"
+    state: directory
+
+- name: Download artifact in docker image
+  get_url:
+    url: "{{ artifact_storage_path }}{{ artifact_name }}"
+    validate_certs: no
+    url_password: "{{ nexus_password }}"
+    url_username: "{{ nexus_user }}"
+    dest: '{{ agent_artifact_path }}{{ artifact_name }}'
+  delegate_to: localhost
+
+- name: Get artifact name without extension
+  set_fact:
+    artifact_base_name: "{{ artifact_name | regex_replace('.tar.gz', '') }}"
+
+- name: Get artifact
+  copy:
+    src: '{{ agent_artifact_path }}{{ artifact_name }}' #путь до артифакта в docker container
+    dest: '{{ builds_folder }}{{ artifact_name }}' #копируем на целевой хост нужную папку
+
+- name: Create folder {{ builds_folder }}{{ artifact_base_name }}
+  file:
+    path: "{{ builds_folder }}{{ artifact_base_name }}"
+    state: directory
+
+- name: Unzip code
+  unarchive:
+    src: "{{ builds_folder }}{{ artifact_name }}"
+    dest: "{{ builds_folder }}{{ artifact_base_name }}"
+    remote_src: yes
+    extra_opts: [--strip-components=1]
+  no_log: true
+
+- name: chmod -R 777 {{builds_folder}}{{ artifact_base_name }}/cache
+  file:
+    path: "{{builds_folder}}{{ artifact_base_name }}/cache"
+    owner: "{{ ansible_login }}"
+    group: "{{ ansible_login }}"
+    recurse: yes
+    mode: "0777"
+
+- name: chmod o+w {{builds_folder}}{{ artifact_base_name }}/public/static/documentation
+  file:
+    path: "{{builds_folder}}{{ artifact_base_name }}/public/static/documentation"
+    owner: "{{ ansible_login }}"
+    group: "{{ ansible_login }}"
+    recurse: yes
+    mode: "o+w"
+
+- name: Remove zip
+  file:
+    name: "{{ builds_folder }}{{ artifact_name }}"
+    state: absent
+
+
+
+
+
