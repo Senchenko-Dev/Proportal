@@ -1,0 +1,163 @@
+---
+- name: Change Permittion folder {{ supervisord }}
+  become: yes
+  file:
+    path: "{{ supervisord }}"
+    owner: "{{ ansible_login }}"
+    group: "{{ ansible_login }}"
+
+- block:
+    - name: Clear folder before work
+      file:
+        name: "{{ item }}"
+        state: absent
+      loop:
+        - "{{ supervisord }}/AutoAllocationJobProc34.ini"
+        - "{{ supervisord }}/NewAutoAllocationJobProc34.ini"
+        - "{{ supervisord }}/NewAutoAllocationFillJobProc34.ini"
+        - "{{ supervisord }}/Mailer.ini"
+        - "{{ supervisord }}/SparkApi.ini"
+        - "{{ supervisord }}/queue.ini"
+        - "{{ supervisord }}/queue-tpipe.ini"
+        - "{{ supervisord }}/tpipe-job-distrib.ini"
+        - "{{ supervisord }}/kafka-consumer.ini"
+        - "{{ supervisord }}/kafka-celd.ini"
+        - "{{ supervisord }}/mqRead.ini"
+        - "{{ supervisord }}/mqSend.ini"
+        - "{{ supervisord }}/SparkUpdateCommand.ini"
+        - "{{ supervisord }}/sms-send.ini"
+  when: server_APP_ENV in ['test63','cert1','prod3','prod4','prod5','prod6']
+
+- block:
+    - name: Copy template Mailer.ini file to -> {{ supervisord }}
+      template:
+        src: "Mailer.ini"
+        dest: "{{ supervisord }}/Mailer.ini"
+  when: server_APP_ENV in ['test63','cert1','prod3','prod4','prod5','prod6']
+
+- block:
+    - name: Copy templates {{ supervisord }}
+      template:
+        src: "{{ item }}"
+        dest:  "{{ supervisord }}"
+      with_items:
+        - "SparkApi.ini"
+        - "AutoAllocationJobProc34.ini"
+        - "NewAutoAllocationJobProc34.ini"
+        - "NewAutoAllocationFillJobProc34.ini"
+        - "queue.ini"
+        - "queue-tpipe.ini"
+        - "tpipe-job-distrib.ini"
+        - "SparkUpdateCommand.ini"
+        - "kafka-consumer.ini"
+        - "kafka-celd.ini"
+        - "mqRead.ini"
+        - "mqSend.ini"
+        - "mqInbound.ini"
+        - "mqInbound2.ini"
+        - "mqInbound3.ini"
+  when: server_APP_ENV in ['test63','prod5','prod6','cert1']
+
+- name: Supervisorctl update
+  become: yes
+  shell: supervisorctl update
+  ignore_errors: yes
+
+- name: Supervisorctl restart all
+  become: yes
+  shell: supervisorctl restart all
+  ignore_errors: yes
+
+- name: Delete folder with symlink
+  file:
+    path: "{{ prod_symlink }}"
+    state: absent
+
+- name: Create symlink on latest build
+  file:
+    src: "{{ builds_folder }}{{ artifact_base_name }}/"
+    dest: "{{ prod_symlink }}"
+    state: link
+    force: yes
+
+- name: Copy template ProPortal nginx.conf
+  template:
+    src: "nginx.conf"
+    dest: "{{ conf_folder }}"
+  when: server_APP_ENV in ['test63', 'prod3', 'prod4', 'prod5', 'prod6', 'cert1']
+
+- name: Copy template For Teams nginx.conf
+  template:
+    src: "nginx.conf_{{ item }}"
+    dest: "{{ conf_folder }}/nginx.conf"
+  when: (server_APP_ENV == item)
+  loop:
+    - onboarding
+    - payboosters
+    - proleads
+    - agents
+    - payroll
+    - corp
+    - proloans
+    - pro_sales_front_1
+    - pro_sales_front_2
+    - profuture
+    - corp2
+    - corp3
+
+- name: Change Permittion folder /etc/cron.d
+  become: yes
+  file:
+    path: "/etc/cron.d"
+    owner: "{{ ansible_login }}"
+    group: "{{ ansible_login }}"
+
+- name: Cron.d STOP
+  become: yes
+  systemd:
+    name: crond.service
+    state: stopped
+
+# Crontab prod3 + prod4
+- name: Copy proportal-tasks crontab prod3 + prod4
+  template:
+    src: "portal-tasks-prod3+prod4.cron"
+    dest: "{{ proportal_tasks }}"
+  when: server_APP_ENV in ['prod3','prod4']
+
+# Crontab cert1
+- name: Copy proportal-tasks crontab cert1
+  template:
+    src: "portal-tasks-cert1.cron"
+    dest: "{{ proportal_tasks }}"
+  when: (server_APP_ENV == "cert1")
+
+# Crontab prod5 + prod6 + test63
+- name: Copy proportal-tasks crontab prod5 + test63
+  template:
+    src: "portal-tasks-prod5+prod6+test63.cron"
+    dest: "{{ proportal_tasks }}"
+  when: server_APP_ENV in ['test63','prod5','prod6']
+
+- name: Cron.d START
+  become: yes
+  systemd:
+    name: crond.service
+    state: started
+
+#- name: Create symlink on vue/dist
+#  file:
+#    src: "{{ builds_folder }}{{ artifact_base_name }}/vue/dist"
+#    dest: "{{ builds_folder }}{{ artifact_base_name }}/public/vue"
+#    state: link
+#    force: yes
+
+# Nginx релоадим после всех подготовок
+- name: nginx -s reload
+  become: yes
+  shell: nginx -s reload
+
+- name: Restart PHP-FPM
+  become: yes
+  shell: systemctl restart php74-php-fpm.service
+
