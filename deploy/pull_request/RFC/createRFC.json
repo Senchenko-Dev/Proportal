@@ -1,0 +1,31 @@
+{
+	"fields": {
+		"project": {
+			"key": "RFC"
+		},
+		"summary": "Релиз %BUILD%",
+		"issuetype": {
+			"name": "Task"
+		},
+		"customfield_16904": "%PROJECTKEY%",
+		"customfield_17700": {
+			"value": "Прикладное изменение"
+		},
+		"customfield_17701": {
+			"value": "Плановое изменение"
+		},
+		"customfield_19622": {
+            "value": "Плановый релиз - Minor"
+        },
+		"customfield_12404": "%COMMENT%",
+		"customfield_17502": "%JOB_START%",
+		"customfield_17503": "%JOB_FINISH%",
+		"customfield_17703": "00:00",
+		"customfield_17704": {
+			"value": "Есть"
+		},
+		"customfield_17705": "00:05",
+		"description": "%PLAINTEXT_COMMENT%  \n This task was created automatically by Jenkins Pipeline"
+	}
+}
+
