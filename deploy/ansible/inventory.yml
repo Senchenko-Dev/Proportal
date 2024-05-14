@@ -1,0 +1,146 @@
+all:
+  children:
+    test63:
+      hosts:
+        proportal_test63:
+          ansible_host: 193.48.98.63
+          server_APP_ENV: test63
+          ansible_user: "{{ ansible_login }}"
+          ansible_become_password: "{{ ansible_password }}"
+          ansible_user_id: 759912185
+    onboarding:
+      hosts:
+        onboarding_test63:
+          ansible_host: 193.48.98.63
+          server_APP_ENV: onboarding
+          ansible_user: "{{ ansible_login }}"
+          ansible_become_password: "{{ ansible_password }}"
+          ansible_user_id: 759912185
+    payboosters:
+      hosts:
+        payboosters_test63:
+          ansible_host: 193.48.98.63
+          server_APP_ENV: payboosters
+          ansible_user: "{{ ansible_login }}"
+          ansible_become_password: "{{ ansible_password }}"
+          ansible_user_id: 759912185
+    proleads:
+      hosts:
+        proleads_test63:
+          ansible_host: 193.48.98.63
+          server_APP_ENV: proleads
+          ansible_user: "{{ ansible_login }}"
+          ansible_become_password: "{{ ansible_password }}"
+          ansible_user_id: 759912185
+    agents:
+      hosts:
+        agents_test63:
+          ansible_host: 193.48.98.63
+          server_APP_ENV: agents
+          ansible_user: "{{ ansible_login }}"
+          ansible_become_password: "{{ ansible_password }}"
+          ansible_user_id: 759912185
+    payroll:
+      hosts:
+        payroll_test63:
+          ansible_host: 193.48.98.63
+          server_APP_ENV: payroll
+          ansible_user: "{{ ansible_login }}"
+          ansible_become_password: "{{ ansible_password }}"
+          ansible_user_id: 759912185
+    corp:
+      hosts:
+        corp_test63:
+          ansible_host: 193.48.98.63
+          server_APP_ENV: corp
+          ansible_user: "{{ ansible_login }}"
+          ansible_become_password: "{{ ansible_password }}"
+          ansible_user_id: 759912185
+    corp2:
+      hosts:
+        corp2_test63:
+          ansible_host: 193.48.98.63
+          server_APP_ENV: corp2
+          ansible_user: "{{ ansible_login }}"
+          ansible_become_password: "{{ ansible_password }}"
+          ansible_user_id: 759912185
+    corp3:
+      hosts:
+        corp3_test63:
+          ansible_host: 193.48.98.63
+          server_APP_ENV: corp3
+          ansible_user: "{{ ansible_login }}"
+          ansible_become_password: "{{ ansible_password }}"
+          ansible_user_id: 759912185
+    proloans:
+      hosts:
+        proloans_test63:
+          ansible_host: 193.48.98.63
+          server_APP_ENV: proloans
+          ansible_user: "{{ ansible_login }}"
+          ansible_become_password: "{{ ansible_password }}"
+          ansible_user_id: 759912185
+    pro_sales_front_1:
+      hosts:
+        pro_sales_front_1_test63:
+          ansible_host: 193.48.98.63
+          server_APP_ENV: pro_sales_front_1
+          ansible_user: "{{ ansible_login }}"
+          ansible_become_password: "{{ ansible_password }}"
+          ansible_user_id: 759912185
+    pro_sales_front_2:
+      hosts:
+        pro_sales_front_2_test63:
+          ansible_host: 193.48.98.63
+          server_APP_ENV: pro_sales_front_2
+          ansible_user: "{{ ansible_login }}"
+          ansible_become_password: "{{ ansible_password }}"
+          ansible_user_id: 759912185
+    profuture:
+      hosts:
+        profuture_test63:
+          ansible_host: 193.48.98.63
+          server_APP_ENV: profuture
+          ansible_user: "{{ ansible_login }}"
+          ansible_become_password: "{{ ansible_password }}"
+          ansible_user_id: 759912185
+    cert1:
+      hosts:
+        proportal_cert1:
+          ansible_host: 193.48.68.163
+          server_APP_ENV: cert1
+          ansible_user: "{{ ansible_login }}"
+          ansible_become_password: "{{ ansible_password }}"
+          ansible_user_id: 298577208
+    prod3:
+      hosts:
+        proportal_prod3:
+          ansible_host: 193.48.9.80
+          server_APP_ENV: prod3
+          ansible_user: "{{ ansible_login }}"
+          ansible_become_password: "{{ ansible_password }}"
+          ansible_user_id: 298577208
+    prod4:
+      hosts:
+        proportal_prod4:
+          ansible_host: 193.48.8.163
+          server_APP_ENV: prod4
+          ansible_user: "{{ ansible_login }}"
+          ansible_become_password: "{{ ansible_password }}"
+          ansible_user_id: 298577208
+    prod5:
+      hosts:
+        proportal_prod5:
+          ansible_host: 193.48.9.143
+          server_APP_ENV: prod5
+          ansible_user: "{{ ansible_login }}"
+          ansible_become_password: "{{ ansible_password }}"
+          ansible_user_id: 298577208
+    prod6:
+      hosts:
+        proportal_prod6:
+          ansible_host: 193.48.9.219
+          server_APP_ENV: prod6
+          ansible_user: "{{ ansible_login }}"
+          ansible_become_password: "{{ ansible_password }}"
+          ansible_user_id: 298577208
