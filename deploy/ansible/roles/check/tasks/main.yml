@@ -1,0 +1,11 @@
+---  
+#отрезания zip
+- name: Get artifact name without extension
+  set_fact:
+    artifact_base_name: "{{ artifact_name | regex_replace('.tar.gz', '') }}"
+
+#проверка на существующий на сервере билд
+- name: Check path to exists build folder
+  stat:
+    path: "{{ builds_folder }}{{ artifact_base_name }}"
+  register: folder_check
