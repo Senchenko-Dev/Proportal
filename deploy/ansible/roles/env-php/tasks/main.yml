@@ -1,0 +1,54 @@
+- name: Copy template .env file to -> {{ builds_folder }}{{ artifact_base_name }}
+  template:
+    src: ".env.j2"
+    dest: "{{ builds_folder }}{{ artifact_base_name }}/.env"
+
+- name: Move favicon to TEST
+  copy:
+    src: "favicon-test/{{ item }}"
+    dest: "{{ builds_folder }}{{ artifact_base_name }}/public"
+    remote_src: false
+  loop:
+    - favicon.ico
+    - favicon.png
+  when: server_APP_ENV in ['test63','onboarding','payboosters','proleads','agents','payroll','pro_sales_front_1','pro_sales_front_2','profuture']
+
+- name: Move favicon to PROD
+  copy:
+    src: "favicon-prod/{{ item }}"
+    dest: "{{ builds_folder }}{{ artifact_base_name }}/public"
+    remote_src: false
+  with_items:
+    - favicon.ico
+    - favicon.png
+  when: server_APP_ENV in ['prod3', 'prod4', 'prod5', 'prod6', 'cert1']
+
+- name: Warmup Cache
+  shell: php74 bin/console cache:warmup
+  args:
+    chdir: "{{ builds_folder }}{{ artifact_base_name }}/"
+
+- name: Make Symlinks
+  shell: php74 bin/console make:symlink
+  args:
+    chdir: "{{ builds_folder }}{{ artifact_base_name }}/"
+
+- name: Warmup сonfig сache
+  shell: php74 bin/console config:cache
+  args:
+    chdir: "{{ builds_folder }}{{ artifact_base_name }}/"
+
+- name: Migrations
+  shell: php74 bin/console doctrine:migrations:migrate --no-interaction --all-or-nothing
+  args:
+    chdir: "{{ builds_folder }}{{ artifact_base_name }}/"
+  when: server_APP_ENV in ['test63', 'cert1', 'prod6']
+  
+- name: chmod -R 777 {{builds_folder}}{{ artifact_base_name }}/var
+  file:
+    path: "{{builds_folder}}{{ artifact_base_name }}/var"
+    owner: "{{ ansible_login }}"
+    group: "{{ ansible_login }}"
+    recurse: yes
+    mode: "0777"
+
