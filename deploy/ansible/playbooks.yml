@@ -1,0 +1,33 @@
+- hosts: all
+  gather_facts: false
+  tasks:
+  
+    # проверка на существующую папку на сервере
+    - name: run check
+      include_role:
+        name: check
+
+    # скачиваем себе (в линукс) с нексуса свежий билд, копируем на сервер, раззиповываем его там в правильную папку.
+    - name: run download-code role
+      include_role:
+        name: download-code
+      when: not folder_check.stat.exists #ставим when для того чтобы в каждой роле не делать block (скипалась роль целеком)
+
+    # сначала готовим .env с настройками к БД
+    - name: run make .env file
+      include_role:
+        name: env-php
+      when: not folder_check.stat.exists
+      register: env_php_result #переменная которая сохраняет состояние выполнение роли env-php 
+
+    # потом редактируем задания, и сразу их запускаем по необходимости
+    - name: run linux tasks configuration role
+      include_role:
+        name: proportal-cron-nginx
+      when: not folder_check.stat.exists or env_php_result is failed #Условие проверки существования папки и проврека роли на ее выполнение (если роль env-php без ошибок то запустится роль proportal-cron-nginx)
+      
+    # чистим за собой
+    - name: run cleanup role
+      include_role:
+        name: clean-up
+      when: not folder_check.stat.exists
